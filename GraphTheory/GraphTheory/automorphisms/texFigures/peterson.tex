@@ -1,0 +1,15 @@
+\begin{tikzpicture}[every node/.style={draw,circle, thick}]
+  \graph[clockwise, radius=2cm] {
+    subgraph C_n [n=5,name=A]
+  };
+
+  \graph[clockwise, radius=1cm, typeset=\(\tikzgraphnodetext'\)] {
+  subgraph I_n [n=5,name=B]
+  };
+
+  \foreach \i [evaluate={\j=int(mod(\i+2+4,5)+1)}]
+     in {1,2,3,4,5}{
+    \draw (A \i) -- (B \i);
+    \draw (B \j) -- (B \i);
+  }
+\end{tikzpicture}

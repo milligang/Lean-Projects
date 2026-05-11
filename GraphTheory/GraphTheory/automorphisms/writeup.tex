@@ -1,0 +1,111 @@
+\documentclass{article}
+\usepackage{preamble}
+
+\usepackage{fullpage}
+\usepackage{setspace}
+\doublespacing
+
+\title{Graph Automorphisms and the Peterson Graph}
+\author{Milligan Grinstead}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Abstract here.
+\end{abstract}
+% Suppose $\Gamma$ is a permutation group acting on a set $\Omega.$ The set $\Gamma(\alpha) = \{g(\alpha) : g \in \Gamma\}$ is the \textit{orbit} of $\alpha \in \Omega$ in $\Gamma.$ The permutation group $\Gamma$ is said to be transitive if $\Gamma(\alpha) = \Omega$ for some $\alpha \in \Omega.$
+\section{Background}
+graph theory, automorphism, peterson graph, formal verification
+
+\textit{Formal verification} is the application of formalized mathematical methods to prove the correctness of a statement or system. \textit{Proof assistants} are software systems that employ formal methods to allow us to construct proofs as computer programs and mechanically verify their correctness. With proof assistants, the validity of a proof is migrated from humans to the correctness of the proof assistant itself. In this paper, we focus on Lean, a proof assistant built upon the Curry-Howard correspondence and centered around the goal to formalize mathematics.
+
+A graph $G$ is defined by its vertices $V(G)$ and edges $E(G).$ Every edge is \textit{incident} to two vertices and is said to \textit{join} these two vertices. Two vertices are considered \textit{adjacent vertices} if there exists some edge in $E(G)$ joining them. Two distinct edges are said to be \textit{adjacent edges} if there is a shared vertex between them. The \textit{complete graph} on $n$ vertices, typically denoted $K_n,$ is the graph with $n$ vertices and $n$ choose $2$ edges such there is exactly one edge between any two vertices. Given a graph $G$ with $n$ vertices, the \textit{complement} of $G$, denoted $G^c,$ is the graph with the vertex set $V(G^c) = V(G)$ and the edge set $E(G^c) = E(K_n) \backslash E(G).$
+
+A \textit{vertex automorpshim} $\varphi : V(G) \mapsto V(G)$ of a graph $G$ is a permutation of the vertices of $G$ that preserves vertex adjacency. of $G.$ An \textit{edge automorpshim} $\varphi : E(G) \mapsto E(G)$ of a graph $G$ is a permutation of the edges of $G$ that preserves edge adjacency. The vertex and edge automorphisms of a graph $G$ form groups referred to as the \textit{vertex automorphism group}, denoted $A(G),$ and the \textit{edge automorphism group}, denoted $A^*(G),$ respectively. A \textit{group} can be any set with an operation that acts on any two elements of the set and is associative. Additionally, each element must have an inverse under this operation and there must exist some identity element. In the case of the automorphism groups, the elements of the set are permutations of either vertices or edges of the graph and the operation is the composition of these permutations.
+% A graph $G$ is \textit{vertex transitive} if $A(G)$ is transitive and is \textit{edge transitive} if $A^*(G)$ is transitive.
+
+Outline
+
+\section{Mathematical Proofs}
+Unless otherwise specified, these proofs were inspired by those in the book by Holton and Sheehan~\cite{main}. First, we show that the vertex automorphism groups of a graph and its complement are equivalent.
+\begin{lemma}\label{lem:autoeq}
+    For any graph $G,$ the vertex automorphism group $A(G)$ of $G$ equals the vertex automorphism group $A(G^c)$ of the complement of $G.$
+\end{lemma}
+\begin{proof}
+   To show $A(G) = A(G^c),$ we must show a permutation $\gamma$ is in $A(G)$ if and only $\gamma$ is in $A(G^c).$ We will first prove the forward direction; let $\gamma$ be any permutation in $A(G).$ Then for any edge $(x, y)$, we know by the properties of vertex automorphisms that edge $(x, y)$ is in $E(G)$ if and only if edge $(\gamma(x), \gamma(y))$ is in $E(G).$ Applying the definition of the complement, this implies edge $(x, y)$ is not in $E(G^c)$ if and only if edge $(\gamma(x), \gamma(y))$ is not in $E(G^c).$ This in turn is logically equivalent to the statement edge $(x, y)$ is in $E(G^c)$ if and only if edge $(\gamma(x), \gamma(y))$ is in $E(G^c).$ Therefore, the permutation $\gamma$ satisfies the properties of an vertex automorphism of $G^c$ and $\gamma \in A(G^c).$ We immediately have the reverse direction because we can swap $G$ with $G^c,$ noting that $(G^c)^c = G.$ Thus, we have shown both directions and can conclude $A(G) = A(G^c).$
+\end{proof}
+There is also a direct relationship between the vertex and edge automorphism groups of a graph as stated in Lemma~\ref{lem:edgevert}. In fact, a stronger version of Lemma~\ref{lem:edgevert} exists regarding graphs with $4$ vertices, but it was more specific than required purposes, so we did not include it here.
+\begin{lemma}\label{lem:edgevert}
+    For any connected graph $G$ with at least $5$ distinct vertices, the vertex automorphism group $A(G)$ of $G$ is equivalent to the edge automorphism group $A^*(G)$ of $G.$
+\end{lemma}
+% The line graph, L(G) of G is the graph whose vertices are the edges of G and where two such vertices are adjacent if the corresponding edges are incident to a common vertex of G. F
+The \textit{line graph} $L(G)$ of a graph $G$ is the graph constructed by assigned each edge in $E(G)$ to a distinct vertex and adding an edge between two vertices if the corresponding edges in $E(G)$ share a vertex in $V(G).$ The vertices of the line graph of $G$ exactly map to the edges of $G,$ so by definition the vertex automorphism group of $L(G)$ equals the edge automorphism group of $G.$
+\begin{cor}\label{cor:lineedge}
+    For any graph $G,$ the vertex automorphism group $A(L(G))$ of the line graph of $G$ is isomorphic to the edge automorphism group $A^*(G)$ of $G.$
+\end{cor}
+The \textit{symmetric group} $S_n$ of degree $n$ is the group of all permutations of a set with $n$ items.
+\begin{lemma}\label{lem:autocomplete}
+    The vertex automorphism group $A(K_n)$ of the complete graph on $n$ vertices is isomorphic to the symmetric group $S_n.$
+\end{lemma}
+
+With this background, we now turn to an example with the Peterson graph, shown in Figure~\ref{fig:peterson}. The goal will be to prove Theorem~\ref{thm:petsym} which states that the vertex automorphism group of the Peterson graph is isomorphic to the symmetric group $S_5.$
+
+Suppose we had vertices $1, \dots, 5$ and $1', \dots, 5'$ and the edge sets defined as
+\begin{align*}
+    E_1 &= \{(1,2), (2, 3), (3, 4), (4, 5), (5, 1)\}\\
+    E_2 &= \{(1,1'), (2, 2'), (3, 3'), (4, 4'), (5, 5')\}\\
+    E_3 &= \{(1',3'), (2', 4'), (3', 5'), (4', 1'), (5, 2')\}
+\end{align*}
+Then the \textit{Peterson graph} is the graph $P$ with $V(P) = \{1, \dots, 5, 1', \dots, 5'\}$ and $E(P) = E_1 \cup E_2 \cup E_3.$
+
+\begin{figure}
+    \centering
+    \input{texFigures/peterson}
+    \caption{The Peterson graph}
+    \label{fig:peterson}
+\end{figure}
+
+\begin{lemma}\label{lem:line_pet}
+    The Peterson graph $P$ is equivalent to $L(K_5)^c,$ the complement of the line graph of $K_5,$ the complete graph on $5$ vertices.
+\end{lemma}
+
+Define the permutations $\gamma_1 = (12345)(1'2'3'4'5')$ and $\gamma_2 = (11')(24'53')(32'45')$ on the vertices of $P.$ Let $\gamma_1^*$ and $\gamma_2^*$ be the corresponding permutations on the edges of $P.$ 
+\begin{claim}
+    The permutations $\gamma_1$ and $\gamma_2$ are in $A(G).$ This also implies $\gamma_1^*$ and $\gamma_2^*$ are in $A^*(G).$
+\end{claim}
+
+\begin{theorem}\label{thm:petsym}
+The automorphism group $A(P)$ of the Peterson graph $P$ is equivalent to the symmetric group $S_5$.
+\end{theorem}
+\begin{proof}
+    First, note that $P = L(K_5)^c$ by Lemma~\ref{lem:line_pet}. Then we have the following chain of conclusions
+    \begin{align*}
+        A(P) &= A(L(K_5)) &&\text{by Lemma~\ref{lem:autoeq}}\\
+        &\cong A^*(K_5) &&\text{by Corollary~\ref{cor:lineedge}}\\
+        &\cong A(K_5) &&\text{by Lemma~\ref{lem:edgevert}}\\
+        &= S_5 &&\text{by Lemma~\ref{lem:autocomplete}}.
+    \end{align*}
+    Thus, $A(P) = S_5$ which is what we wanted to show.
+\end{proof}
+
+% \begin{theorem}
+% The Peterson graph $P$ is edge transitive.
+% \end{theorem}
+
+% \begin{proof}
+% For any two edges $e_1, e_2 \in E_1,$ there exists some power of $\gamma_1^*$ sending $e_1$ to $e_2,$ and similarly for any two edges in $E_2$ or $E_3.$ For any two edges $e_1 \in E_1$ and $e_2 \in E_3,$ there exists some power of $\gamma_2^*$ sending $e_1$ to $e_2.$ The permutation $\gamma_3^* = (21')(34')(2'3')$ sends some edges in $E_2$ to $E_1$ and some edges to $E_3.$ Combining $\gamma_1^*, \gamma_2^*, \gamma_3^*$ or their powers thus sends $e_1$ to $e_2$ for any $e_1, e_2 \in E(P)$. Thus $P$ is edge-transitive.
+% \end{proof}
+
+\section{Implementation}
+
+\begin{thebibliography}{99}
+
+\bibitem{holton}\label{main}
+D. A. Holton and J. Sheehan, “The Petersen graph,” in \textit{The Petersen Graph}, Cambridge: Cambridge University Press, 1993, pp. 1–48
+
+\end{thebibliography}
+
+\end{document}

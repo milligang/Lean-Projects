@@ -1,0 +1,1 @@
+Implementing proofs in Lean. See writeups in each project folder for details on the proof implemented.

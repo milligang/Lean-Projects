@@ -1,7 +1,8 @@
 \documentclass{article}
-\input{preamble}
+\usepackage{preamble, setspace, fullpage}
+\doublespacing
 
-\title{Graph Automorphisms and the Peterson Graph}
+\title{Graph Automorphisms and the Petersen Graph}
 \author{Milligan Grinstead}
 \date{}
 
@@ -13,9 +14,9 @@
 \section{Introduction}
 This paper describes a short implementation of graph automorphism groups as well as the formal verification of related results in the proof assistant Lean.
 
-\textit{Formal verification} is the application of formalized mathematical methods to prove the correctness of a statement or system. \textit{Proof assistants} are software systems that employ formal methods to allow us to construct proofs as computer programs and mechanically verify their correctness. The proof assistant Lean is built upon the Curry-Howard correspondence and is centered around the goal to formalize mathematics. With proof assistants, the validity of a proof is migrated from humans to the correctness of the proof assistant itself. Results can be trusted more readily especially when they are complex or review is slow, errors are mitigated with the immediate output from the machine, and proofs are thorough, stating each explicit step. The purpose of this project is support the young and rapid development of Lean by exploring a subset of graph theory utilizing the existing library structures. In particular, I will provide an implementation of graph automorphism groups and a result about the Peterson graph with these new definitions.
+\textit{Formal verification} is the application of formalized mathematical methods to prove the correctness of a statement or system. \textit{Proof assistants} are software systems that employ formal methods to allow us to construct proofs as computer programs and mechanically verify their correctness. The proof assistant Lean is built upon the Curry-Howard correspondence and is centered around the goal to formalize mathematics. With proof assistants, the validity of a proof is migrated from humans to the correctness of the proof assistant itself. Results can be trusted more readily especially when they are complex or review is slow, errors are mitigated with the immediate output from the machine, and proofs are thorough, stating each explicit step. The purpose of this project is support the young and rapid development of Lean by exploring a subset of graph theory utilizing the existing library structures. In particular, I will provide an implementation of graph automorphism groups and a result about the Petersen graph with these new definitions.
 
-A graph $G$ is defined by its vertices $V(G)$ and edges $E(G).$ Every edge is \textit{incident} to two vertices and is said to \textit{join} these two vertices. Two vertices are considered \textit{adjacent vertices} if there exists some edge in $E(G)$ joining them. Two edges are considered \textit{adjacent edges} if there is a shared vertex between them. For the purposes of this paper, all graphs are considered simple and finite. That is, no vertex is adjacent to itself, no two edges are adjacent to exactly the same vertices, the number of vertices is finite, and the number of edges is finite. An example simple, finite graph is shown in Figure~\ref{fig:k5}. In the next section, I will define vertex and edge automorphism groups of a graph. Then, in Section~\ref{sec:pet}, I will introduce the Peterson graph and explore its vertex automorphism group. Crucially, these results have been formalized in Lean, and commentary on the implementation process is offered throughout.
+A graph $G$ is defined by its vertices $V(G)$ and edges $E(G).$ Every edge is \textit{incident} to two vertices and is said to \textit{join} these two vertices. Two vertices are considered \textit{adjacent vertices} if there exists some edge in $E(G)$ joining them. Two edges are considered \textit{adjacent edges} if there is a shared vertex between them. For the purposes of this paper, all graphs are considered simple and finite. That is, no vertex is adjacent to itself, no two edges are adjacent to exactly the same vertices, the number of vertices is finite, and the number of edges is finite. An example of a simple, finite graph is shown in Figure~\ref{fig:k5}. In the next section, I will define vertex and edge automorphism groups of a graph. Then, I will introduce the Petersen graph and explore its vertex automorphism group in Section~\ref{sec:pet}. Crucially, these results have been formalized in Lean, and commentary on the implementation process is offered throughout.
 \begin{figure}
     \centering
     \input{figures/K5}
@@ -25,24 +26,36 @@ A graph $G$ is defined by its vertices $V(G)$ and edges $E(G).$ Every edge is \t
 
 
 \section{Automorphism Groups}
-A \textit{vertex automorpshim} $\varphi : V(G) \mapsto V(G)$ of a graph $G$ is a permutation of the vertices of $G$ that preserves vertex adjacency. of $G.$ An \textit{edge automorpshim} $\varphi : E(G) \mapsto E(G)$ of a graph $G$ is a permutation of the edges of $G$ that preserves edge adjacency. The vertex and edge automorphisms of a graph $G$ form groups referred to as the \textit{vertex automorphism group}, denoted $A(G),$ and the \textit{edge automorphism group}, denoted $A^*(G),$ respectively. A \textit{group} can be any set with an operation that acts on two elements of the set to produce another element in the set and is associative. Additionally, each element must have an inverse under this operation and there must exist some identity element. In the case of the automorphism groups, the elements of the set are permutations of either vertices or edges of the graph and the operation is the composition of these permutations. Vertex automorphisms can be implemented with the {\sc comap} method for simple graphs in Lean. However, edges are defined via the vertices and an adjacency relation on a graph, and there is not a corresponding function for the edge type. Instead, I utilized the line graph. The \textit{line graph} $L(G)$ of a graph $G$ is the graph constructed by assigned each edge in $E(G)$ to a distinct vertex and adding an edge between two vertices if the corresponding edges in $E(G)$ share a vertex in $V(G).$ The vertices of the line graph of $G$ exactly map to the edges of $G,$ so by definition the vertex automorphism group of $L(G)$ equals the edge automorphism group of $G.$
-\begin{corollary}\label{cor:lineedge}
+A \textit{vertex automorpshim} $\varphi : V(G) \mapsto V(G)$ of a graph $G$ is a permutation of the vertices of $G$ that preserves vertex adjacency. of $G.$ An \textit{edge automorpshim} $\varphi : E(G) \mapsto E(G)$ of a graph $G$ is a permutation of the edges of $G$ that preserves edge adjacency. The vertex and edge automorphisms of a graph $G$ form groups referred to as the \textit{vertex automorphism group}, denoted $A(G),$ and the \textit{edge automorphism group}, denoted $A^*(G),$ respectively. A \textit{group} can be any set with an operation that acts on two elements of the set to produce another element in the set and is associative. Additionally, each element must have an inverse under this operation and there must exist some identity element. In the case of the automorphism groups, the elements of the set are permutations of either vertices or edges of the graph and the operation is the composition of these permutations. Vertex automorphisms can be implemented with the {\sc comap} method for simple graphs in Lean. However, edges are defined via the vertices and an adjacency relation on a graph, and there is not a corresponding function for the edge type. Instead, I utilized the line graph. The \textit{line graph} $L(G)$ of a graph $G$ is the graph constructed by assigning each edge in $E(G)$ to a distinct vertex and adding an edge between two vertices if the corresponding edges in $E(G)$ share a vertex in $V(G).$ The vertices of the line graph of $G$ exactly map to the edges of $G,$ so by definition the vertex automorphism group of $L(G)$ equals the edge automorphism group of $G.$
+\begin{cor}\label{cor:lineedge}
     For any graph $G,$ the vertex automorphism group $A(L(G))$ of the line graph of $G$ is equivalent to the edge automorphism group $A^*(G)$ of $G.$
-\end{corollary}
+\end{cor}
 \noindent Thus, I defined the edge automorphism group as the vertex automorphism group of line graph.
 
-There is also a direct equivalence between the vertex and edge automorphism groups of a graph as seen in Theorem~\ref{thm:edgevert}. Before stating this, we will need to define isomorphisms. Two items $X$ and $Y$ may be called \textit{isomorphic}, denoted $X \cong Y,$ if there is a structure-preserving bijection between them. If $X$ and $Y$ are graphs, we have $X \cong Y$ if there exists a bijection map $f$ on the vertices that preserves vertex adjacency. For two groups $(X, *)$ and $ (Y, \cdot)$, we have $(X, *) \cong (Y, \cdot)$ if there exists a bijection function $f$ on the elements of the group such that such that for any two elements $x_1, x_2$ in $X,$ we have $f(x_1 * x_2) = f(x_1) \cdot f(x_2),$ and similarly for elements in $Y$ under the inverse $f^{-1}$. More generally, isomorphisms express mathematical equivalence. As one might expect, isomorphisms between graphs translate directly to isomorphisms between automorphism groups.
+There is also a direct equivalence between the vertex and edge automorphism groups of a graph as seen in Theorem~\ref{thm:edgevert}. Before stating this, we will need to define isomorphisms. Two items $X$ and $Y$ may be called \textit{isomorphic}, denoted $X \cong Y,$ if there is a structure-preserving bijection between them. If $X$ and $Y$ are graphs, we have $X \cong Y$ if there exists a bijection map $f$ on the vertices that preserves vertex adjacency. For two groups $(X, *)$ and $ (Y, \cdot)$, we have $(X, *) \cong (Y, \cdot)$ if there exists a bijection function $f$ on the elements of the group such that such that for any two elements $x_1, x_2$ in $X,$ we have $f(x_1 * x_2) = f(x_1) \cdot f(x_2),$ and similarly for elements in $Y$ under the inverse $f^{-1}$. More generally, isomorphisms express mathematical equivalence. As one might expect, isomorphisms between graphs translate directly to isomorphisms between automorphism groups. The proof of this statement in Lemma~\ref{lem:cong} was constructed to match the definition of {\sc MulEquiv} in Mathlib. {\sc MulEquiv} is the type in Lean's library Mathlib for an equivalence between two types with a `multiplication' operation, or in this case, composition of permutations.  
 
 \begin{lemma}\label{lem:cong}
     Suppose $G$ and $H$ are any two graphs. If $G$ and $H$ are isomorphic then $A(G)$ and $A(H)$ are isomorphic.
 \end{lemma}
 \begin{proof}
-    Let $\phi$ be the bijective function mapping $G$ to $H.$ Define the function $g(\gamma) = \phi(\gamma)$ construct function $g$ from permutations in $A(G)$ to permutations in $A(H).$ To show $g$ is a bijective function inducing an isomorphism between the groups, we must show for any $\gamma_1, \gamma_2 \in A(G)$ that $g (\gamma_1) \in A(H),$ $g^{-1}(\gamma_1)$
-    % toFun : M → N
-    % invFun : N → M
-    % left_inv : Function.LeftInverse self.invFun self.toFun
-    % right_inv : Function.RightInverse self.invFun self.toFun
-    % map_mul' (x y : M) : self.toFun (x * y) = self.toFun x * self.toFun y
+    Let $\phi$ be the bijective function mapping $G$ to $H.$ Define the function $g(\gamma) = \phi \circ \gamma \circ \phi^{-1}.$ We will show that $g$ is a bijective function from elements of $A(G)$ to $A(H)$ inducing an isomorphism between the groups. First, note that for any permutation $\gamma$ in $A(G),$ the permutation $g(\gamma)$ is in $A(H).$ We first map the vertices of $H$ to those in $G$ by applying the bijective function $\phi^{-1},$ then permute the vertices with $\gamma$ while preserving adjacency since $\gamma$ is in $A(G),$ and then map the vertices back to graph $H$ with $\phi.$ The function $\phi$ is bijective and preserves adjacency, so the permutation $g(\gamma)$ is in $A(H).$ We can use a symmetric argument for the function $f(\gamma) = \phi^{-1}\circ \gamma \circ \phi$ to show $f(\gamma)$ is in $A(G)$ for all permutations $\gamma$ in $A(H).$ 
+    
+    In order for $g$ and $f$ to form a bijective function between $A(G)$ and $A(H),$ we need to show $g$ and $f$ are inverses, that is $f = g^{-1}$ and $g = f^{-1}.$ To do this, we can show $(g \circ f) (\gamma)$ and $(f \circ g) (\gamma)$ produce identity functions for all permutations $\gamma:$
+    \begin{align*}
+        (g \circ f) (\gamma) &= \phi \circ f(\gamma) \circ \phi^{-1} = \phi \circ (\phi^{-1} \circ \gamma \circ \phi) \circ \phi^{-1} = \gamma\\
+        (f \circ g) (\gamma) &= \phi^{-1}\circ g(\gamma) \circ \phi = \phi^{-1} \circ (\phi \circ \gamma \circ \phi^{-1}) \circ \phi = \gamma
+    \end{align*}
+    Thus, the functions $g$ and $f$ are inverses of each other, so $g$ is a bijective function.
+
+    
+    Finally, let $\gamma_1$ and $\gamma_2$ be any two permutations in $A(G).$ Since $\phi^{-1} \circ \phi$ is the identity function, it can be inserted arbitrarily in a function without altering the output and we have:
+    \begin{align*}
+        g(\gamma_1 \circ \gamma_2) &= \phi \circ (\gamma_1 \circ \gamma_2) \circ \phi^{-1}\\
+        &= \phi \circ (\gamma_1 \circ (\phi^{-1} \circ \phi) \circ \gamma_2) \circ \phi^{-1}\\
+        &= (\phi \circ \gamma_1 \circ \phi^{-1}) \circ (\phi \circ \gamma_2 \circ \phi^{-1})\\
+        &= g(\gamma_1) \circ g(\gamma_2).
+    \end{align*}
+    Therefore, we have shown that $A(G)$ and $A(H)$ are isomorphic when $G$ and $H$ are isomorphic because there exists a bijective function $g$ such that for any two permutations $\gamma_1$ and $\gamma_2,$ we have $g(\gamma_1 \circ \gamma_2) = g(\gamma_1) \circ g(\gamma_2).$
 \end{proof}
 
 In 1932, Whitney~\cite{whit} first implied vertex and edge automorphism groups were isomorphic for most graphs by classifying the uniqueness of line graph isomorphisms in relation to isomorphisms of the original graph. 
@@ -51,57 +64,61 @@ In 1932, Whitney~\cite{whit} first implied vertex and edge automorphism groups w
 \end{theorem} 
 In fact, a stronger version of Theorem~\ref{thm:edgevert} exists regarding graphs with $4$ vertices, but it was more detailed than required here. Since this is a longer result and not the main goal of this project, the theorem was left as an axiom in the code to be formalized in future work. For a proof, see \cite{whit} or \cite{intro}.
 
-The \textit{complete graph} on $n$ vertices, typically denoted $K_n,$ is the graph with $n$ vertices and $n$ choose $2$ edges such there is exactly one edge between any two vertices. The graph $K_5$ is shown in Figure~\ref{fig:k5}. Since every vertex in the complete graph is adjacent, it naturally follows that it is isomorphic under any permutation of its vertices. The \textit{symmetric group} $S_n$ of degree $n$ is the group of all permutations of a set with $n$ items. Thus, this can be more formally stated as $K_n \cong S_n.$
+The \textit{symmetric group} $S_n$ of degree $n$ is the group of all permutations of a set with $n$ items. In Section~\ref{sec:pet}, the concluding theorem will show the vertex automorphism group of the Petersen graph is isomorphic to $S_n.$ This first requires proving a shorter, more general result relating $S_n$ to complete graphs. The \textit{complete graph} on $n$ vertices, typically denoted $K_n,$ is the graph with $n$ vertices and $n$ choose $2$ edges such there is exactly one edge between any two vertices. The graph $K_5$ is shown in Figure~\ref{fig:k5}. Since every vertex in the complete graph is adjacent to every other vertex, it naturally follows that it is isomorphic under any permutation of its vertices. Thus, we have $A(K_n) = S_n.$ Holton and Sheehan in \cite{holton} mention this fact, though their justification is a single sentence. The proof presented below, while still short, expands that sentence to reflect the more detailed Lean code, for a beauty of formalization is that no step remains hidden and all assumptions are made explicit.
 \begin{lemma}\label{lem:autocomplete}
-    The vertex automorphism group $A(K_n)$ of the complete graph on $n$ vertices is isomorphic to the symmetric group $S_n$ on the set $V(K_n).$
+    The vertex automorphism group $A(K_n)$ of the complete graph on $n$ vertices is equivalent to the symmetric group $S_n$ on the set $V(K_n).$
 \end{lemma}
 \begin{proof}
-    % γ ∈ autGroupVert ⊤ ↔ γ ∈ ⊤, except is always true
-    % in essence, show every possible permuation of the vertices of $K_n$ is included in $A(K_n)$
-    % this means, given arbitrary perm. gam and vertices u, v, have adj u v iff adj gam u gam v. if u = v then trivially done. assume u not v
-    % but all vertices u and v are adjacent in Kn, so adj u v is true and gam maps u and v to vertices in Kn which are adjacent
+    To show two groups with the same operation are equal, it suffices to show the underlying sets are the same. That is, we must show that a permutation $\gamma$ is in $A(K_n)$ if and only if $\gamma$ is in $S_n.$ Since $S_n$ on the set $V(K_n)$ contains all possible permutations of vertices, we simply need to show all permutations are also in $A(K_n).$ Let $\gamma$ be any permutation of the vertices of $K_n.$ The permutation $\gamma$ is in the vertex automorphism group of a graph if adjacency is preserved under the permutation. Thus $\gamma$ is in $A(K_n)$ if we have $(u, v) \in E(K_n)$ if and only if $(\gamma(u), \gamma(v)) \in E(K_n)$ for all vertices $u, v$ in $V(K_n).$ For complete graphs, the edge $(u, v)$ is in $E(K_n)$  for all vertices $u \neq v$ in $V(K_n).$ Hence $\gamma$ is in $A(K_n)$ if we have $u \neq v$ if and only if $\gamma(u) \neq \gamma(v)$ for all vertices $u, v$ in $V(K_n)$. Two vertices $u$ and $v$ in $V(K_n)$ are equal if and only if $\gamma(u) = \gamma(v)$ because permutations are by definition bijective, so $\gamma$ is in $A(K_n)$ for all permutations $\gamma$ of the vertices $V(K_n)$. This is what we wished to show, and we can conclude $A(K_n) = S_n$.
 \end{proof}
 
-Given a graph $G$ with $n$ vertices, the \textit{complement} of $G$, denoted $G^c,$ is the graph with the vertex set $V(G^c) = V(G)$ and the edge set $E(G^c) = E(K_n) \backslash E(G),$ so the complement of the complete graph is the empty graph. Importantly, the vertex  automorphism group of a graph $G$ is isomorphic to the vertex automorphism group of $G^c.$ Note that Corollary~\ref{cor:lineedge} implies this result also applies to edge automorphism groups.
+Given a graph $G$ with $n$ vertices, the \textit{complement} of $G$, denoted $G^c,$ is the graph with the vertex set $V(G^c) = V(G)$ and the edge set $E(G^c) = E(K_n) \backslash E(G),$ so the complement of the complete graph is the graph with $n$ vertices and no edges. Importantly, the vertex  automorphism group of a graph $G$ is isomorphic to the vertex automorphism group of $G^c.$ Note that Corollary~\ref{cor:lineedge} implies this result also applies to edge automorphism groups. The proof is relatively similar to that in \cite{holton} except that it rewrites in reverse, going from the complement graph's automorphism group to the original graph. In the Lean code, it was simpler to split the if-and-only-if into forward and reverse directions rather than translating ``$((u,v) \in E(G) \iff (\gamma(u), \gamma(v)) \in E(G))$'' to ``$\gamma \in A(G)$'' in the last line of this written proof. However, splitting is repetitive on paper and the written proof presented here, modified from \cite{holton}, captures the logical steps taken in the formalization.
 \begin{lemma}\label{lem:autoeq}
     For any graph $G,$ the vertex automorphism group $A(G)$ of $G$ equals the vertex automorphism group $A(G^c)$ of the complement of $G.$
 \end{lemma}
 \begin{proof}
-    % suffices to show members of group are equal
-    % given permuation gamma, in a g iff in a gc
-    % in group if adjacency set is same before and after permuation
-    % u, v adj in gc if u $\neq$ v and not adj in G
-    % $\gamma$ u $\neq$ $\gamma$ v if u not v
-    % thus, drop that. 
-    % then have not g adj = not gamma g adjacent
-    % drop nots, now two sides are equivalent
-   % To show $A(G) = A(G^c),$ we must show a permutation $\gamma$ is in $A(G)$ if and only $\gamma$ is in $A(G^c).$ We will first prove the forward direction; let $\gamma$ be any permutation in $A(G).$ Then for any edge $(x, y)$, we know by the properties of vertex automorphisms that edge $(x, y)$ is in $E(G)$ if and only if edge $(\gamma(x), \gamma(y))$ is in $E(G).$ Applying the definition of the complement, this implies edge $(x, y)$ is not in $E(G^c)$ if and only if edge $(\gamma(x), \gamma(y))$ is not in $E(G^c).$ This in turn is logically equivalent to the statement edge $(x, y)$ is in $E(G^c)$ if and only if edge $(\gamma(x), \gamma(y))$ is in $E(G^c).$ Therefore, the permutation $\gamma$ satisfies the properties of an vertex automorphism of $G^c$ and $\gamma \in A(G^c).$ We immediately have the reverse direction because we can swap $G$ with $G^c,$ noting that $(G^c)^c = G.$ Thus, we have shown both directions and can conclude $A(G) = A(G^c).$
+    As mentioned in Lemma~\ref{lem:autocomplete}, it suffices to show a permutation $\gamma$ is in $A(G)$ if and only if $\gamma$ is in $A(H).$ Note that a permutation $\gamma$ is in the vertex automorphism group of a graph if adjacency is preserved under the permutation. Additionally, two vertices in $G^c$ are adjacent if they are distinct and are not adjacent in $G.$ Thus, we can deduce the following equivalence statements with classical logic for all permutations $\gamma$ and for any vertices $u, v \in V(G) = V(G^c):$
+    \begin{align*}
+        \gamma \in A(G) &\iff \gamma \in A(G^c)\\
+        &\iff ((u,v) \in E(G^c) \iff (\gamma(u), \gamma(v)) \in E(G^c))\\
+        &\iff (u \neq v \wedge (u,v) \notin E(G) \iff \gamma(u) \neq \gamma(v) \wedge (\gamma(u), \gamma(v)) \notin E(G))\\
+        &\iff (u \neq v \wedge (u,v) \notin E(G) \iff u \neq v \wedge (\gamma(u), \gamma(v)) \notin E(G))\\
+        &\iff ((u,v) \notin E(G) \iff (\gamma(u), \gamma(v)) \notin E(G))\\
+        &\iff ((u,v) \in E(G) \iff (\gamma(u), \gamma(v)) \in E(G))\\
+        &\iff \gamma \in A(G)\\
+    \end{align*}
+   Hence, a permutation is in $A(G)$ if and only if it is also in $A(G^c),$ and $A(G) = A(G^c).$
 \end{proof}
 
-\section{The Peterson Graph}\label{sec:pet}
-This section explores the Peterson graph $P$ and its automorphism group. The Peterson graph, shown in Figure~\ref{fig:peterson}, is a popular example and counterexample throughout graph theory. The goal will be to prove Theorem~\ref{thm:petsym} which states that the vertex automorphism group of the Peterson graph is isomorphic to the symmetric group $S_5.$ The most natural way to label the vertices of the Peterson graph is with values $1-5,$ or $0-4$ if one is zero-indexing. The first labeling I assigned to the vertices is shown in Figure~\ref{fig:peterson} with values $0-4$ and $0'-4'$. As mentioned by Holton and Sheehan in~\cite{holton}, two adjacency-preserving permutations clearly seen in this figure are $\gamma_1 = (12345)(1'2'3'4'5')$ and $\gamma_2 = (11')(24'53')(32'45').$ As an exercise, I formalized a proof that $\gamma_1$ and $\gamma_2$ are in $A(P)$ in the Lean code.
+\section{The Petersen Graph}\label{sec:pet}
+This section explores the Petersen graph $P$ and its automorphism group. The Petersen graph, shown in Figure~\ref{fig:petersen}, is a popular example and counterexample throughout graph theory. The goal will be to prove Theorem~\ref{thm:petsym} which states that the vertex automorphism group of the Petersen graph is isomorphic to the symmetric group $S_5.$ The most natural way to label the vertices of the Petersen graph is with values $1-5,$ or $0-4$ if one is zero-indexing. The first labeling I assigned to the vertices is shown in Figure~\ref{fig:petersen} with values $0-4$ and $0'-4'$. As mentioned by Holton and Sheehan in~\cite{holton}, two adjacency-preserving permutations clearly seen in this figure are $\gamma_1 = (12345)(1'2'3'4'5')$ and $\gamma_2 = (11')(24'53')(32'45').$ As an exercise, I formalized a proof that $\gamma_1$ and $\gamma_2$ are in $A(P)$ in the Lean code.
 
 \begin{figure}
 \centering
     \begin{minipage}{0.5\textwidth}
         \centering
-        \input{figures/peterson}
+        \input{figures/petersen}
     \end{minipage}%
     \begin{minipage}{0.4\textwidth}
         \centering
         \input{figures/pet2}
     \end{minipage}
-    \label{fig:peterson}
-    \caption{Two isomorphic labelings of the Peterson Graph.}
+    \label{fig:petersen}
+    \caption{Two isomorphic labelings of the Petersen Graph.}
 \end{figure}
 
-However, the proof of Theorem~\ref{thm:petsym} relies on the proof that $P$ is isomorphic to $L(K_5)^c.$ This proved rather difficult with the given representation. 
+However, the proof of Theorem~\ref{thm:petsym} relies on the proof that $P$ is isomorphic to $L(K_5)^c.$ This became rather difficult to formalize with the given representation of the Petersen graph and $K_5$. Instead, inspired by the labeling given by Zaslavsky, I redefined the Petersen graph with the vertices as the ten unordered pairs from the integers 0 to 4 as shown in Figure~\ref{fig:petersen}. An edge exists when the ordered pairs of two vertices contains no shared integers. The figure clearly displays the isomorphism of these two graphs, though this relationships is also verified in the Lean code. With this representation, the proof of $P \cong L(K_5)^c$ transformed into a series of short translations from the graph $K_5$ to $L(K_5)$ to $L(K_5)^c.$
+
 \begin{lemma}\label{lem:line_pet}
-    The Peterson graph $P$ is isomorphic to $L(K_5)^c,$ the complement of the line graph of $K_5,$ the complete graph on $5$ vertices.
+    The Petersen graph $P$ is isomorphic to $L(K_5)^c,$ the complement of the line graph of $K_5,$ the complete graph on $5$ vertices.
 \end{lemma}
+\begin{proof}
+    Consider the graph $K_5$ shown in Figure~\ref{fig:k5} with vertices labeled 0 through 4. In this graph, each vertex is adjacent to all other vertices. For line graph of $K_5,$ each vertex can be labeled by the edge it represents. For instance, the vertex corresponding to edge $(0,4) \in E(K_5)$ would be labeled $(0,4)$ in $V(L(K_5)).$ Thus, there are ten vertices in $V(L(K_5)),$ the unordered pairs of the integers 0 to 4, and two vertices of this line graph have an edge between them if the ordered pairs share a common integer. Therefore, in the complement of $L(K_5),$ two vertices are adjacent if the ordered pairs do not share a common integer. This exactly matches our definition of the vertices and edges for the Petersen graph given above and displayed in Figure~\ref{fig:petersen}, so we conclude $P = L(K_5)^c.$
+\end{proof}
+Though not mentioned in the mathematical proof above, this also involved converting the types of the vertices on occasion in the Lean code. For instance, I created a local version of the $L(K_5)$ graph that had the same vertex type as the Petersen graph to perform the majority of the proof, and then I used definitional simplification to show that this vertex type was isomorphic to the library's type for the edge set of the complete graph on five vertices. With Lemma~\ref{lem:line_pet} and the corresponding proof formalized, Theorem~\ref{thm:petsym} relating $A(P)$ to $S_5$ can now be completed. The proof presented below and followed in the implementation follows Holton and Sheehan's proof in \cite{holton}. 
 
 \begin{theorem}\label{thm:petsym}
-The automorphism group $A(P)$ of the Peterson graph $P$ is isomorphic to the symmetric group $S_5$.
+The automorphism group $A(P)$ of the Petersen graph $P$ is isomorphic to the symmetric group $S_5$.
 \end{theorem}
 \begin{proof}
     First, note that $P \cong L(K_5)^c$ by Lemma~\ref{lem:line_pet}. Then we have the following chain of conclusions
@@ -115,15 +132,10 @@ The automorphism group $A(P)$ of the Peterson graph $P$ is isomorphic to the sym
     Thus, $A(P) \cong S_5$ which is what we wanted to show.
 \end{proof}
 
-% \begin{theorem}
-% The Peterson graph $P$ is edge transitive.
-% \end{theorem}
-
-% \begin{proof}
-% For any two edges $e_1, e_2 \in E_1,$ there exists some power of $\gamma_1^*$ sending $e_1$ to $e_2,$ and similarly for any two edges in $E_2$ or $E_3.$ For any two edges $e_1 \in E_1$ and $e_2 \in E_3,$ there exists some power of $\gamma_2^*$ sending $e_1$ to $e_2.$ The permutation $\gamma_3^* = (21')(34')(2'3')$ sends some edges in $E_2$ to $E_1$ and some edges to $E_3.$ Combining $\gamma_1^*, \gamma_2^*, \gamma_3^*$ or their powers thus sends $e_1$ to $e_2$ for any $e_1, e_2 \in E(P)$. Thus $P$ is edge-transitive.
-% \end{proof}
-
+\newpage
 \begin{thebibliography}{99}
+\bibitem{intro}
+M. Behzad and G. Chartrand, Introduction to the Theory of Graphs, Allyn and Bacon (1973).
 
 \bibitem{holton}
 D. A. Holton and J. Sheehan, “The Petersen graph,” in \textit{The Petersen Graph}, Cambridge: Cambridge University Press (1993), 1--48.
@@ -131,8 +143,8 @@ D. A. Holton and J. Sheehan, “The Petersen graph,” in \textit{The Petersen G
 \bibitem{whit}
 H. Whitney, Congruent Graphs and the Connectivity of Graphs, \textit{American Journal of Mathematics} 54 (1932), 150--168.
 
-\bibitem{intro}
-M. Behzad and G. Chartrand, Introduction to the Theory of Graphs, Allyn and Bacon (1973).
+\bibitem{labeling}
+T. Zaslavsky, Six Signed Petersen Graphs and their Automorphisms, Department of Mathematical Sciences, Binghamton University, (2011).
 \end{thebibliography}
 
 \end{document}

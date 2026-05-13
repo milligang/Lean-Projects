@@ -120,13 +120,13 @@ lemma autGroup_complete_eq_symm (n : ℕ) :
 end autGroup
 
 
-namespace Peterson
-/- Defining the Peterson graph analgously to
+namespace Petersen
+/- Defining the Petersen graph analgously to
 the Königsberg graph in the mathlib archive Wiedijk100Theorems
 Explicity listing vertices and edges
 -/
 
--- The vertices for the Peterson graph
+-- The vertices for the Petersen graph
 inductive Verts : Type
   | V1 | V2 | V3 | V4 | V5
   | U1 | U2 | U3 | U4 | U5
@@ -135,13 +135,13 @@ inductive Verts : Type
 open Verts
 
 -- Each of the connections in the graph
---These are ordered pairs, but the data becomes symmetric in `Peterson.adj`.
+--These are ordered pairs, but the data becomes symmetric in `Petersen.adj`.
 def edges : List (Verts × Verts) :=
   [(V1, V3), (V1, V4), (V2, V4), (V2, V5), (V3, V5),
    (U1, U2), (U2, U3), (U3, U4), (U4, U5), (U5, U1),
    (V1, U1), (V2, U2), (V3, U3), (V4, U4), (V5, U5)]
 
--- The adjacency relation for the Peterson graph.
+-- The adjacency relation for the Petersen graph.
 def adj (v w : Verts) : Bool := (v, w) ∈ edges || (w, v) ∈ edges
 
 @[simps]
@@ -156,7 +156,7 @@ instance : DecidableRel pet.Adj := fun a b => inferInstanceAs <| Decidable (adj 
 
 
 section permutations
-/- a few permutations of the Peterson graph -/
+/- a few permutations of the Petersen graph -/
 
 def perm_γ₁ : Equiv.Perm Verts :=
   c[V1, V2, V3, V4, V5] * c[U1, U2, U3, U4, U5]
@@ -235,10 +235,10 @@ noncomputable def verts_eq_K₅ : Verts ≃ K₅.edgeSet := by
   apply Equiv.symm
   exact Classical.choice K₅_eq_fin10_nonempty
 
-end Peterson
+end Petersen
 
-namespace altPeterson
-/- an alternate definition of the peterson graph
+namespace altPetersen
+/- an alternate definition of the petersen graph
 designed to more naturally conclude reslts such as relationship to L(K₅)ᶜ
 -/
 
@@ -263,9 +263,9 @@ instance : DecidableRel pet.Adj := fun a b => inferInstanceAs <| Decidable (adj 
 lemma verts_card : Fintype.card Verts = 10 := by rfl
 lemma edges_card : Fintype.card pet.edgeFinset = 15 := by rfl
 
-/- this version of the peterson graph is equivalent to the trivial definition -/
+/- this version of the petersen graph is equivalent to the trivial definition -/
 -- apparently, need to include proof too for map
-def verts_to_verts (v : Peterson.Verts) : Verts :=
+def verts_to_verts (v : Petersen.Verts) : Verts :=
   match v with
   | .V1 => ⟨s(2,4), by trivial⟩
   | .V2 => ⟨s(1,4), by trivial⟩
@@ -278,7 +278,7 @@ def verts_to_verts (v : Peterson.Verts) : Verts :=
   | .U4 => ⟨s(1,2), by trivial⟩
   | .U5 => ⟨s(3,4), by trivial⟩
 
-noncomputable def verts_eq_verts : Peterson.Verts ≃ Verts := by
+noncomputable def verts_eq_verts : Petersen.Verts ≃ Verts := by
   apply Equiv.ofBijective verts_to_verts
   rw [Fintype.bijective_iff_injective_and_card]
   constructor
@@ -289,7 +289,7 @@ noncomputable def verts_eq_verts : Peterson.Verts ≃ Verts := by
   · rw [verts_card]
     exact Nat.eq_of_beq_eq_true rfl -- from "apply?"
 
-noncomputable def pet_to_alt_pet : Peterson.pet ≃g altPeterson.pet where
+noncomputable def pet_to_alt_pet : Petersen.pet ≃g pet where
   toEquiv := verts_eq_verts
   map_rel_iff' := by
     intro u v
@@ -299,10 +299,10 @@ noncomputable def pet_to_alt_pet : Peterson.pet ≃g altPeterson.pet where
     fin_cases v <;>
     trivial
 
-/- proof Peterson is isomorphic to  L(K₅)ᶜ -/
+/- proof Petersen is isomorphic to  L(K₅)ᶜ -/
 -- custom K₅ line graph, slightly easier to work with later -/
 def K₅_line : SimpleGraph Verts where
-  Adj u v :=  u ≠ v ∧ ¬(Disjoint u.val.toFinset v.val.toFinset)
+  Adj u v := u ≠ v ∧ ¬(Disjoint u.val.toFinset v.val.toFinset)
   symm := by
     rintro u v ⟨neq, h⟩
     constructor
@@ -361,12 +361,12 @@ def pet_to_comp_line : pet ≃g K₅.lineGraphᶜ := by
     apply not_congr
     exact (SimpleGraph.Iso.map_adj_iff K₅_line_to_K₅_line)
 
-end altPeterson
+end altPetersen
 
-/- vertex autmorphism group of peterson is S₅ -/
-noncomputable def eq_autGroup_pet_symm : autGroupVert Peterson.pet ≃* Equiv.Perm (Fin 5) := by
-  apply MulEquiv.trans (eq_iso_autGroup Peterson.pet altPeterson.pet_to_alt_pet)
-  apply MulEquiv.trans (eq_iso_autGroup altPeterson.pet altPeterson.pet_to_comp_line)
+/- vertex autmorphism group of petersen is S₅ -/
+noncomputable def eq_autGroup_pet_symm : autGroupVert Petersen.pet ≃* Equiv.Perm (Fin 5) := by
+  apply MulEquiv.trans (eq_iso_autGroup Petersen.pet altPetersen.pet_to_alt_pet)
+  apply MulEquiv.trans (eq_iso_autGroup altPetersen.pet altPetersen.pet_to_comp_line)
   rw [←autGroup_compl K₅.lineGraph]
   have :
     (autGroupVert K₅.lineGraph) =
